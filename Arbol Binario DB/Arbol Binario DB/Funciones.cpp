@@ -16,7 +16,7 @@ bool Funciones::Eliminar()
 		else if (posR->hijoDerecho != nullptr && posR->hijoIzquierdo != nullptr)
 		{
 			this->temporalFather = this->Raiz;
-			this->EliminarAmbosHijos(&this->Raiz, posR);
+			this->EliminarAmbosHijos(&this->Raiz, posR, nullptr);
 		}
 		else
 		{
@@ -115,10 +115,12 @@ bool Funciones::EliminarAmbosHijosArchivo(ItemInMemory * father, ItemInMemory * 
 	this->leyendo.seekg(posNewEliminado * sizeof(Item) + 4);
 	this->leyendo.read(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
 	newEliminadoA.HijoDerecho = eliminadoA.HijoDerecho;
-	newEliminadoA.HijoIzquierdo = eliminadoA.HijoIzquierdo;
-	this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
-	this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
+	newEliminadoA.HijoIzquierdo = -1;
+		if(posNewEliminado != eliminadoA.HijoIzquierdo)
+			newEliminadoA.HijoIzquierdo = eliminadoA.HijoIzquierdo;
 	this->escribiendo->seekp(posNewEliminado * sizeof(Item) + 4);
+	this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
+	this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
 	this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
 	if (last != nullptr)
 	{
@@ -159,7 +161,7 @@ bool Funciones::EliminarSoloArchivo(ItemInMemory * father, ItemInMemory * elimin
 {
 	if (!this->escribiendo->is_open())
 	{
-		this->escribiendo->open(this->ArchiveName, ios::in | ios::binary);
+		this->escribiendo->open(this->ArchiveName, ios::in | ios::out | ios::binary);
 	}
 
 	Item eliminadoA,fatherA;
@@ -267,34 +269,33 @@ bool Funciones::EliminarUnHijo(ItemInMemory * father, ItemInMemory * eliminado, 
 	}
 	return false;
 }
-ItemInMemory * Funciones::TraerUltimo(ItemInMemory * subRaiz)
+ItemInMemory * Funciones::TraerUltimo(ItemInMemory ** subRaiz)
 {
-	if (subRaiz->hijoDerecho == nullptr)
+	if ((*subRaiz)->hijoDerecho == nullptr)
 	{
-		subRaiz->hijoDerecho = nullptr;
 		ItemInMemory* nuevo = new ItemInMemory();
-		nuevo->Nombre = subRaiz->Nombre;
-		nuevo->Departamento = subRaiz->Departamento;
-		nuevo->alturaDerecha = subRaiz->alturaDerecha;
-		nuevo->alturaIzquierda = subRaiz->alturaIzquierda;
-		nuevo->codigo = subRaiz->codigo;
-		nuevo->hijoDerecho = subRaiz->hijoDerecho;
-		nuevo->hijoIzquierdo = subRaiz->hijoIzquierdo;
-		subRaiz = nullptr;
+		nuevo->Nombre = (*subRaiz)->Nombre;
+		nuevo->Departamento = (*subRaiz)->Departamento;
+		nuevo->alturaDerecha = (*subRaiz)->alturaDerecha;
+		nuevo->alturaIzquierda = (*subRaiz)->alturaIzquierda;
+		nuevo->codigo = (*subRaiz)->codigo;
+		nuevo->hijoDerecho = (*subRaiz)->hijoDerecho;
+		nuevo->hijoIzquierdo = (*subRaiz)->hijoIzquierdo;
+		*subRaiz = nullptr;
 		return nuevo;
 	}
 	else
 	{
-		ItemInMemory* retornar =  this->TraerUltimo(subRaiz->hijoDerecho);
-		if (subRaiz->hijoDerecho!=nullptr)
+		ItemInMemory* retornar =  this->TraerUltimo(&(*subRaiz)->hijoDerecho);
+		if ((*subRaiz)->hijoDerecho!=nullptr)
 		{
-			subRaiz->alturaDerecha = this->Max(subRaiz->hijoDerecho->alturaDerecha, subRaiz->hijoDerecho->alturaIzquierda);
+			(*subRaiz)->alturaDerecha = this->Max((*subRaiz)->hijoDerecho->alturaDerecha, (*subRaiz)->hijoDerecho->alturaIzquierda);
 		}
 		else
 		{
-			subRaiz->alturaDerecha = 0;
+			(*subRaiz)->alturaDerecha = 0;
 		}
-		this->Balancear(&subRaiz);
+		this->Balancear(subRaiz);
 		return retornar;
 	}
 	return nullptr;
@@ -411,7 +412,7 @@ bool Funciones::EliminarSolo(ItemInMemory * father, ItemInMemory * eliminado)
 	}
 	return false;
 }
-bool Funciones::EliminarAmbosHijos(ItemInMemory ** subRaiz, ItemInMemory * eliminado)
+bool Funciones::EliminarAmbosHijos(ItemInMemory ** subRaiz, ItemInMemory * eliminado, ItemInMemory * fatherN)
 {
 	if (*subRaiz == nullptr)
 	{
@@ -419,25 +420,28 @@ bool Funciones::EliminarAmbosHijos(ItemInMemory ** subRaiz, ItemInMemory * elimi
 	}
 	else if ((*subRaiz) == eliminado)
 	{
-		ItemInMemory* temporal = this->TraerUltimo((*subRaiz)->hijoIzquierdo);
+		ItemInMemory* temporal = this->TraerUltimo(&(*subRaiz)->hijoIzquierdo);
 		temporal->hijoDerecho = eliminado->hijoDerecho;
 		temporal->hijoIzquierdo = eliminado->hijoIzquierdo;
 		temporal->alturaDerecha = eliminado->alturaDerecha;
-		temporal->alturaIzquierda = eliminado->alturaIzquierda;
+		temporal->alturaIzquierda = 0;
+		if (temporal->hijoIzquierdo != nullptr)
+			temporal->alturaIzquierda = this->Max(temporal->hijoIzquierdo->alturaDerecha, temporal->hijoIzquierdo->alturaIzquierda);
 		*subRaiz = temporal;
+		this->EliminarAmbosHijosArchivo(fatherN, eliminado, temporal);
 		this->Balancear(&temporal);
 	}
 	else if ((*subRaiz)->codigo > eliminado->codigo)
 	{
 		this->temporalFather = *subRaiz;
-		this->EliminarAmbosHijos(&(*subRaiz)->hijoIzquierdo, eliminado);
+		this->EliminarAmbosHijos(&(*subRaiz)->hijoIzquierdo, eliminado,*subRaiz);
 		(*subRaiz)->alturaIzquierda = this->Max((*subRaiz)->hijoIzquierdo->alturaDerecha, (*subRaiz)->hijoIzquierdo->alturaIzquierda);
 		this->Balancear(subRaiz);
 	}
 	else
 	{
 		this->temporalFather = *subRaiz;
-		this->EliminarAmbosHijos(&(*subRaiz)->hijoDerecho, eliminado);
+		this->EliminarAmbosHijos(&(*subRaiz)->hijoDerecho, eliminado, *subRaiz);
 		(*subRaiz)->alturaDerecha = this->Max((*subRaiz)->hijoDerecho->alturaDerecha, (*subRaiz)->hijoDerecho->alturaIzquierda);
 		this->Balancear(subRaiz);
 	}
@@ -663,11 +667,11 @@ Funciones::Funciones()
 {
 	this->newRaiz = 0;
 	this->fatherToMoveInArchive = nullptr;
-	this->ArchiveName = "joel4.dat";
+	this->ArchiveName = "joel5.dat";
 	this->Raiz = nullptr;
 	this->escribiendo = new ofstream(this->ArchiveName, ios::in | ios::out | ios::binary);
 	if(!escribiendo->is_open())
-		this->escribiendo->open(this->ArchiveName);	
+		this->escribiendo->open(this->ArchiveName, ios::in | ios::out | ios::binary);
 	this->escribiendo->close();
 	this->CargarArchivo();
 }
