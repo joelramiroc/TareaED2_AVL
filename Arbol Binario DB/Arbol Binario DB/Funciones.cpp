@@ -68,70 +68,103 @@ bool Funciones::EliminarAmbosHijosArchivo(ItemInMemory * father, ItemInMemory * 
 	}
 
 	int principal;
-	this->leyendo.seekg(0, ios::beg);
-	this->leyendo.read(reinterpret_cast<char*>(&principal), sizeof(int));
-	this->leyendo.close();
 
 	int posEliminado, posFather, posNewEliminado, posSinHijo;
-	Item fatherA, eliminadoA, newEliminadoA, sinHijoa,temporal;
+	Item fatherA, eliminadoA, newEliminadoA, sinHijoa,temporal,fatherNull;
 	temporal.Codigo = -1;
 	temporal.HijoDerecho = -1;
 	temporal.HijoIzquierdo = -1;
 	ItemInMemory* last = this->posLastDerecho(eliminado->hijoIzquierdo);
 
+	this->leyendo.seekg(0, ios::beg);
+	this->leyendo.read(reinterpret_cast<char*>(&principal), sizeof(int));
+	this->leyendo.seekg(principal * sizeof(Item) + 4);
+	this->leyendo.read(reinterpret_cast<char*>(&fatherNull), sizeof(Item));
+	this->leyendo.close();
 	posEliminado = this->BuscarenArchivo(eliminado->codigo, principal);
 	posNewEliminado = this->BuscarenArchivo(newInEliminado->codigo, posEliminado);
-	posFather = this->BuscarenArchivo(father->codigo, principal);
 
-	if (this->Raiz == eliminado)
+	if(father != nullptr)
+		posFather = this->BuscarenArchivo(father->codigo, principal);
+
+	if (fatherNull.Codigo == eliminado->codigo)
 	{
-		int temporal= 0;
 		this->escribiendo->seekp(0, ios::beg);
 		this->escribiendo->write(reinterpret_cast<char*>(&posNewEliminado), sizeof(int));
+		this->escribiendo->seekp(principal * sizeof(Item) + 4);
+		this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
+
+
+		this->leyendo.close();
+		this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
+		this->leyendo.seekg(posNewEliminado * sizeof(Item) + 4);
+		this->leyendo.read(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
+		this->leyendo.seekg(posEliminado * sizeof(Item) + 4);
+		this->leyendo.read(reinterpret_cast<char*>(&eliminadoA), sizeof(Item));
+		newEliminadoA.HijoDerecho = eliminadoA.HijoDerecho;
+		newEliminadoA.HijoIzquierdo = -1;
+		if (posNewEliminado != eliminadoA.HijoIzquierdo)
+			newEliminadoA.HijoIzquierdo = eliminadoA.HijoIzquierdo;
+		this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
+		this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
+		this->escribiendo->seekp(posNewEliminado * sizeof(Item) + 4);
+		this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
+		if (last != nullptr)
+		{
+			this->leyendo.close();
+			posSinHijo = this->BuscarenArchivo(last->codigo, principal);
+			this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
+			this->leyendo.seekg(posSinHijo * sizeof(Item) + 4);
+			this->leyendo.read(reinterpret_cast<char*>(&sinHijoa), sizeof(Item));
+			sinHijoa.HijoDerecho = -1;
+			this->escribiendo->seekp(posSinHijo * sizeof(Item) + 4);
+			this->escribiendo->write(reinterpret_cast<char*>(&sinHijoa), sizeof(Item));
+		}
+
+
 	}
 	else
 	{
 		this->leyendo.close();
 		this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
-		this->leyendo.seekg(posFather*sizeof(Item) + 4);
+		this->leyendo.seekg(posFather * sizeof(Item) + 4);
 		this->leyendo.read(reinterpret_cast<char*>(&fatherA), sizeof(Item));
 		if (fatherA.HijoDerecho == posEliminado)
 		{
-			fatherA.HijoDerecho = posNewEliminado;
+			fatherA.HijoDerecho = posEliminado;
 		}
 		else
 		{
-			fatherA.HijoIzquierdo = posNewEliminado;
+			fatherA.HijoIzquierdo = posEliminado;
 		}
 		this->escribiendo->seekp(posFather * sizeof(Item) + 4);
 		this->escribiendo->write(reinterpret_cast<char*>(&fatherA), sizeof(Item));
-	}
-	this->leyendo.close();
-	this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
-	this->leyendo.seekg(posNewEliminado * sizeof(Item) + 4);
-	this->leyendo.read(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
-	this->leyendo.seekg(posEliminado * sizeof(Item) + 4);
-	this->leyendo.read(reinterpret_cast<char*>(&eliminadoA), sizeof(Item));
-	this->leyendo.seekg(posNewEliminado * sizeof(Item) + 4);
-	this->leyendo.read(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
-	newEliminadoA.HijoDerecho = eliminadoA.HijoDerecho;
-	newEliminadoA.HijoIzquierdo = -1;
-		if(posNewEliminado != eliminadoA.HijoIzquierdo)
-			newEliminadoA.HijoIzquierdo = eliminadoA.HijoIzquierdo;
-	this->escribiendo->seekp(posNewEliminado * sizeof(Item) + 4);
-	this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
-	this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
-	this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
-	if (last != nullptr)
-	{
+
 		this->leyendo.close();
-		posSinHijo = this->BuscarenArchivo(last->codigo, principal);
 		this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
-		this->leyendo.seekg(posSinHijo * sizeof(Item) + 4);
-		this->leyendo.read(reinterpret_cast<char*>(&sinHijoa), sizeof(Item));
-		sinHijoa.HijoDerecho = -1;
-		this->escribiendo->seekp(posSinHijo * sizeof(Item) + 4);
-		this->escribiendo->write(reinterpret_cast<char*>(&sinHijoa), sizeof(Item));
+		this->leyendo.seekg(posNewEliminado * sizeof(Item) + 4);
+		this->leyendo.read(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
+		this->leyendo.seekg(posEliminado * sizeof(Item) + 4);
+		this->leyendo.read(reinterpret_cast<char*>(&eliminadoA), sizeof(Item));
+		newEliminadoA.HijoDerecho = eliminadoA.HijoDerecho;
+		newEliminadoA.HijoIzquierdo = -1;
+		if (posNewEliminado != eliminadoA.HijoIzquierdo)
+			newEliminadoA.HijoIzquierdo = eliminadoA.HijoIzquierdo;
+		this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
+		this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
+		this->escribiendo->seekp(posNewEliminado * sizeof(Item) + 4);
+		this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
+		if (last != nullptr)
+		{
+			this->leyendo.close();
+			posSinHijo = this->BuscarenArchivo(last->codigo, principal);
+			this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
+			this->leyendo.seekg(posSinHijo * sizeof(Item) + 4);
+			this->leyendo.read(reinterpret_cast<char*>(&sinHijoa), sizeof(Item));
+			sinHijoa.HijoDerecho = -1;
+			this->escribiendo->seekp(posSinHijo * sizeof(Item) + 4);
+			this->escribiendo->write(reinterpret_cast<char*>(&sinHijoa), sizeof(Item));
+		}
 	}
 	this->leyendo.close();
 	this->escribiendo->close();
@@ -453,8 +486,12 @@ bool Funciones::escribirLaRaiz()
 		this->escribiendo->open(this->ArchiveName);
 	Item nuevo;
 	nuevo.Codigo = this->Raiz->codigo;
-	strcpy_s(nuevo.Nombre, this->Raiz->Nombre.c_str());
-	strcpy_s(nuevo.Depto, this->Raiz->Departamento.c_str());
+	//this->Raiz->Nombre.copy(nuevo.Nombre, 29);
+	memcpy(nuevo.Nombre, this->Raiz->Nombre.c_str(), 29);
+	nuevo.Nombre[29] = '\0';
+	//this->Raiz->Departamento.copy(nuevo.Depto, 14);
+	memcpy(nuevo.Depto, this->Raiz->Departamento.c_str(), 14);
+	nuevo.Depto[14] = '\0';
 	int a = 0;
 	this->escribiendo->seekp(0, ios::beg);
 	this->escribiendo->write(reinterpret_cast<char*>(&a), sizeof(int));
@@ -464,6 +501,14 @@ bool Funciones::escribirLaRaiz()
 }
 bool Funciones::EscribirEnArchivo(ItemInMemory * father, ItemInMemory * nuevo, int hijo)
 {
+	int comparar, principalL;
+	this->leyendo.close();
+	this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
+	this->leyendo.seekg(0, ios::beg);
+	this->leyendo.read(reinterpret_cast<char*>(&principalL), sizeof(int));
+	comparar = this->BuscarenArchivo(nuevo->codigo, principalL);
+	if (comparar != -1)
+		return false;
 	this->leyendo.close();
 	this->leyendo.open(this->ArchiveName,ios::in | ios::binary);
 	this->leyendo.seekg(0, ios::end);
@@ -503,8 +548,12 @@ bool Funciones::EscribirEnArchivo(ItemInMemory * father, ItemInMemory * nuevo, i
 
 	this->escribiendo->seekp(0, ios::end);
 	Thenuevo.Codigo = nuevo->codigo;
-	strcpy_s(Thenuevo.Nombre, nuevo->Nombre.c_str());
-	strcpy_s(Thenuevo.Depto, nuevo->Departamento.c_str());
+	//this->Raiz->Nombre.copy(nuevo.Nombre, 29);
+	memcpy(Thenuevo.Nombre, nuevo->Nombre.c_str(), 29);
+	Thenuevo.Nombre[29] = '\0';
+	//this->Raiz->Departamento.copy(nuevo.Depto, 14);
+	memcpy(Thenuevo.Depto, nuevo->Departamento.c_str(), 14);
+	Thenuevo.Depto[14] = '\0';
 	this->escribiendo->write(reinterpret_cast<char*>(&Thenuevo), sizeof(Item));
 	this->escribiendo->close();
 	return true;
@@ -612,8 +661,13 @@ bool Funciones::EscribiendoEnArchivo(ItemInMemory ** raiz)
 	escribir.write(reinterpret_cast<char*>(&fatherNuevo), sizeof(Item));
 	escribir.close();
 	fatherNuevo.Codigo = (*raiz)->codigo;
-	strcpy_s(fatherNuevo.Nombre, ((*raiz)->Nombre).c_str());
-	strcpy_s(fatherNuevo.Depto, ((*raiz)->Departamento).c_str());
+
+	memcpy(fatherNuevo.Nombre, (*raiz)->Nombre.c_str(), 29);
+	fatherNuevo.Nombre[29] = '\0';
+	//this->Raiz->Departamento.copy(nuevo.Depto, 14);
+	memcpy(fatherNuevo.Depto, (*raiz)->Departamento.c_str(), 14);
+	fatherNuevo.Depto[14] = '\0';
+
 
 	if ((*raiz)->hijoIzquierdo != nullptr)
 	{
@@ -800,12 +854,18 @@ void Funciones::GiroDerecha(ItemInMemory ** subRaiz)
 }
 void Funciones::DobleGiroIzquierda(ItemInMemory ** subRaiz)
 {
+	ItemInMemory* temporal = this->fatherToMoveInArchive;
+	this->fatherToMoveInArchive = *subRaiz;
 	GiroDerecha(&(*subRaiz)->hijoIzquierdo);
+	this->fatherToMoveInArchive = temporal;
 	GiroIzquierda(subRaiz);
 }
 void Funciones::DobleGiroDerecha(ItemInMemory ** subRaiz)
 {
+	ItemInMemory* temporal = this->fatherToMoveInArchive;
+	this->fatherToMoveInArchive = *subRaiz;
 	GiroIzquierda(&(*subRaiz)->hijoDerecho);
+	this->fatherToMoveInArchive = temporal;
 	GiroDerecha(subRaiz);
 }
 int Funciones::Max(int primero, int segundo)
@@ -984,15 +1044,11 @@ bool Funciones::ActualizarApuntadoresEnArchivo(ItemInMemory * father, ItemInMemo
 
 		if (rotation == 1)
 		{
-			principalFather.HijoDerecho = posFather2;
-			posD3 = this->BuscarenArchivo(father2->codigo, principal);
-			principalFather.HijoDerecho = posD3;
+			principalFather.HijoIzquierdo = posFather2;
 		}
 		else
 		{
-			principalFather.HijoIzquierdo = posFather2;
-			posI3 = this->BuscarenArchivo(father2->codigo, principal);
-			principalFather.HijoIzquierdo = posI3;
+			principalFather.HijoDerecho = posFather2;
 		}
 	}
 
@@ -1010,6 +1066,7 @@ bool Funciones::ActualizarApuntadoresEnArchivo(ItemInMemory * father, ItemInMemo
 		this->escribiendo->write(reinterpret_cast<char*>(&principalFather), sizeof(Item));
 	}
 	this->escribiendo->close();
+	this->leyendo.close();
 	return true;
 }
 bool Funciones::GuardarEnArchivo(string archiveName)

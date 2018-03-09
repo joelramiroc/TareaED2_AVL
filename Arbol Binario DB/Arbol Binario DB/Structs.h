@@ -9,6 +9,7 @@ struct Item
 	char Depto[15];
 	int HijoDerecho=-1;
 	int HijoIzquierdo=-1;
+	int filler = 0;
 };
 
 class ItemInMemory

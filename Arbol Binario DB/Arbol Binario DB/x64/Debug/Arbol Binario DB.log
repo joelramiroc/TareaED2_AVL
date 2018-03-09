@@ -1,0 +1,14 @@
+﻿  Funciones.cpp
+Funciones.cpp(515): warning C4244: 'initializing' : conversion from 'std::streamoff' to 'int', possible loss of data
+Funciones.cpp(572): warning C4305: 'return' : truncation from 'int' to 'bool'
+Funciones.cpp(584): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+Funciones.cpp(596): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+Funciones.cpp(600): warning C4305: 'return' : truncation from 'int' to 'bool'
+Funciones.cpp(626): warning C4305: 'return' : truncation from 'int' to 'bool'
+Funciones.cpp(634): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+Funciones.cpp(642): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+Funciones.cpp(645): warning C4305: 'return' : truncation from 'int' to 'bool'
+Funciones.cpp(659): warning C4244: '=' : conversion from 'std::streamoff' to 'int', possible loss of data
+Funciones.cpp(676): warning C4244: '=' : conversion from 'std::streamoff' to 'int', possible loss of data
+Funciones.cpp(688): warning C4244: '=' : conversion from 'std::streamoff' to 'int', possible loss of data
+  Arbol Binario DB.vcxproj -> C:\Users\joel.caballero\Desktop\TareaED2_AVL\Arbol Binario DB\x64\Debug\Arbol Binario DB.exe
