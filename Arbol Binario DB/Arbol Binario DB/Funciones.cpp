@@ -450,7 +450,7 @@ bool Funciones::EliminarAmbosHijos(ItemInMemory ** subRaiz, ItemInMemory * elimi
 bool Funciones::escribirLaRaiz()
 {
 	if (!this->escribiendo->is_open())
-		this->escribiendo->open(this->ArchiveName, ios::in | ios::out | ios::binary);
+		this->escribiendo->open(this->ArchiveName);
 	Item nuevo;
 	nuevo.Codigo = this->Raiz->codigo;
 	strcpy_s(nuevo.Nombre, this->Raiz->Nombre.c_str());
