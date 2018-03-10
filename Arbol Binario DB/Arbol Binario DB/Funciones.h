@@ -8,11 +8,13 @@
 class Funciones
 {
 private:
+	int posTraer;
+	bool eliminar;
 	bool EliminarAmbosHijosArchivo(ItemInMemory* father, ItemInMemory* eliminado, ItemInMemory* newInEliminado);
 	ItemInMemory* posLastDerecho(ItemInMemory* father);
 	bool EliminarSoloArchivo(ItemInMemory* father, ItemInMemory* eliminado);
 	bool EliminarUnHijo(ItemInMemory* father, ItemInMemory* eliminado,ItemInMemory* newInEliminado);
-	ItemInMemory* TraerUltimo(ItemInMemory ** subRaiz);
+	ItemInMemory* TraerUltimo(ItemInMemory ** subRaiz, ItemInMemory* taher);
 	bool EliminarUnHijo(ItemInMemory* father, ItemInMemory* eliminado);
 	bool EliminarSolo(ItemInMemory* father, ItemInMemory* eliminado);
 	bool EliminarAmbosHijos(ItemInMemory ** subRaiz, ItemInMemory* eliminado, ItemInMemory * fatherN);
