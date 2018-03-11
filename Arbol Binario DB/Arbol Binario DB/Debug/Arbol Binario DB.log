@@ -1,11 +1,11 @@
 ﻿  Funciones.cpp
 c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(73): warning C4101: 'posSinHijo': unreferenced local variable
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(498): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(555): warning C4305: 'return': truncation from 'int' to 'bool'
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(583): warning C4305: 'return': truncation from 'int' to 'bool'
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(609): warning C4305: 'return': truncation from 'int' to 'bool'
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(628): warning C4305: 'return': truncation from 'int' to 'bool'
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(642): warning C4244: '=': conversion from 'std::streamoff' to 'int', possible loss of data
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(659): warning C4244: '=': conversion from 'std::streamoff' to 'int', possible loss of data
-c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(671): warning C4244: '=': conversion from 'std::streamoff' to 'int', possible loss of data
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(513): warning C4244: 'initializing': conversion from 'std::streamoff' to 'int', possible loss of data
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(570): warning C4305: 'return': truncation from 'int' to 'bool'
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(598): warning C4305: 'return': truncation from 'int' to 'bool'
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(624): warning C4305: 'return': truncation from 'int' to 'bool'
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(643): warning C4305: 'return': truncation from 'int' to 'bool'
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(657): warning C4244: '=': conversion from 'std::streamoff' to 'int', possible loss of data
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(674): warning C4244: '=': conversion from 'std::streamoff' to 'int', possible loss of data
+c:\users\joeru\desktop\tareaed2_avl\arbol binario db\arbol binario db\funciones.cpp(686): warning C4244: '=': conversion from 'std::streamoff' to 'int', possible loss of data
   Arbol Binario DB.vcxproj -> C:\Users\JOERU\Desktop\TareaED2_AVL\Arbol Binario DB\Debug\Arbol Binario DB.exe

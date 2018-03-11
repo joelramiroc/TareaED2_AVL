@@ -106,9 +106,9 @@ bool Funciones::EliminarAmbosHijosArchivo(ItemInMemory * father, ItemInMemory * 
 		if (posNewEliminado != eliminadoA.HijoIzquierdo)
 			newEliminadoA.HijoIzquierdo = eliminadoA.HijoIzquierdo;
 
-		this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
-		this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
 		this->escribiendo->seekp(posNewEliminado * sizeof(Item) + 4);
+		this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
+		this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
 		this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
 	}
 	else
@@ -242,7 +242,9 @@ bool Funciones::EliminarUnHijo(ItemInMemory * father, ItemInMemory * eliminado, 
 	this->leyendo.seekg(0, ios::beg);
 	this->leyendo.read(reinterpret_cast<char*>(&principal), sizeof(int));
 	this->leyendo.close();
-	int newPosNewInEliminado = this->BuscarenArchivo(newInEliminado->codigo,principal);
+	int newPosNewInEliminado = -1;
+	if(newInEliminado!=nullptr)
+		newPosNewInEliminado = this->BuscarenArchivo(newInEliminado->codigo,principal);
 	int newPosEliminado = this->BuscarenArchivo(eliminado->codigo, principal);
 	this->posTraer = newPosEliminado;
 
@@ -351,8 +353,14 @@ bool Funciones::EliminarUnHijo(ItemInMemory * father, ItemInMemory * eliminado)
 				this->EliminarUnHijo(father, eliminado, eliminado->hijoIzquierdo);
 				father->hijoDerecho = eliminado->hijoIzquierdo;
 			}
-			
-			father->alturaDerecha = this->Max(father->hijoDerecho->alturaDerecha, father->hijoDerecho->alturaIzquierda);
+			if (father->hijoDerecho != nullptr)
+			{
+				father->alturaDerecha = this->Max(father->hijoDerecho->alturaDerecha, father->hijoDerecho->alturaIzquierda);
+			}
+			else
+			{
+				father->alturaDerecha = 0;
+			}
 		}
 		else
 		{
@@ -366,7 +374,14 @@ bool Funciones::EliminarUnHijo(ItemInMemory * father, ItemInMemory * eliminado)
 				this->EliminarUnHijo(father, eliminado, eliminado->hijoIzquierdo);
 				father->hijoIzquierdo = eliminado->hijoIzquierdo;
 			}
-			father->alturaIzquierda = this->Max(father->hijoIzquierdo->alturaDerecha, father->hijoIzquierdo->alturaIzquierda);
+			if (father->hijoIzquierdo!=nullptr)
+			{
+				father->alturaIzquierda = this->Max(father->hijoIzquierdo->alturaDerecha, father->hijoIzquierdo->alturaIzquierda);
+			}
+			else
+			{
+				father->alturaIzquierda = 0;
+			}
 		}
 
 		this->Balancear(&father);
