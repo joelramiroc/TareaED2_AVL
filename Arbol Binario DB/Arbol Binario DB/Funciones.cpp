@@ -90,10 +90,6 @@ bool Funciones::EliminarAmbosHijosArchivo(ItemInMemory * father, ItemInMemory * 
 
 	if (fatherNull.Codigo == eliminado->codigo)
 	{
-		this->escribiendo->seekp(0, ios::beg);
-		this->escribiendo->write(reinterpret_cast<char*>(&posNewEliminado), sizeof(int));
-		this->escribiendo->seekp(principal * sizeof(Item) + 4);
-		this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
 		this->leyendo.close();
 		this->leyendo.open(this->ArchiveName, ios::in | ios::binary);
 		this->leyendo.seekg(posNewEliminado * sizeof(Item) + 4);
@@ -106,6 +102,10 @@ bool Funciones::EliminarAmbosHijosArchivo(ItemInMemory * father, ItemInMemory * 
 		if (posNewEliminado != eliminadoA.HijoIzquierdo)
 			newEliminadoA.HijoIzquierdo = eliminadoA.HijoIzquierdo;
 
+		this->escribiendo->seekp(0, ios::beg);
+		this->escribiendo->write(reinterpret_cast<char*>(&posNewEliminado), sizeof(int));
+		this->escribiendo->seekp(principal * sizeof(Item) + 4);
+		this->escribiendo->write(reinterpret_cast<char*>(&temporal), sizeof(Item));
 		this->escribiendo->seekp(posNewEliminado * sizeof(Item) + 4);
 		this->escribiendo->write(reinterpret_cast<char*>(&newEliminadoA), sizeof(Item));
 		this->escribiendo->seekp(posEliminado * sizeof(Item) + 4);
@@ -457,7 +457,7 @@ bool Funciones::EliminarAmbosHijos(ItemInMemory ** subRaiz, ItemInMemory * elimi
 		temporal->alturaDerecha = eliminado->alturaDerecha;
 		temporal->alturaIzquierda = 0;
 		if (temporal->hijoIzquierdo != nullptr)
-			temporal->alturaIzquierda = this->Max(temporal->hijoIzquierdo->alturaDerecha, temporal->hijoIzquierdo->alturaIzquierda);
+			temporal->alturaIzquierda = this->Max(temporal->hijoIzquierdo->alturaDerecha, temporal->hijoIzquierdo->alturaIzquierda) + 1;
 		*subRaiz = temporal;
 		this->EliminarAmbosHijosArchivo(fatherN, eliminado, temporal);
 		this->Balancear(&temporal);
@@ -838,6 +838,10 @@ void Funciones::GiroIzquierda(ItemInMemory ** subRaiz)
 	ItemInMemory* _hijoIzquierdo = (*subRaiz)->hijoIzquierdo;
 	(*subRaiz)->hijoIzquierdo = _hijoIzquierdo->hijoDerecho;
 	_hijoIzquierdo->hijoDerecho = *subRaiz;
+
+	if (*subRaiz == this->Raiz)
+		this->Raiz = _hijoIzquierdo;
+
 	*subRaiz = _hijoIzquierdo;
 	ActualizarAlturas(subRaiz);
 	this->ActualizarApuntadoresEnArchivo((*subRaiz)->hijoDerecho, (*subRaiz)->hijoDerecho->hijoDerecho, (*subRaiz)->hijoDerecho->hijoIzquierdo, (*subRaiz), (*subRaiz)->hijoDerecho, (*subRaiz)->hijoIzquierdo,2);
@@ -848,7 +852,11 @@ void Funciones::GiroDerecha(ItemInMemory ** subRaiz)
 	ItemInMemory* _hijoDerecho = (*subRaiz)->hijoDerecho;
 	(*subRaiz)->hijoDerecho = _hijoDerecho->hijoIzquierdo;
 	_hijoDerecho->hijoIzquierdo = *subRaiz;
+	if(*subRaiz == this->Raiz)
+		this->Raiz = _hijoDerecho;
+
 	*subRaiz = _hijoDerecho;
+
 	ActualizarAlturas(subRaiz);
 	this->ActualizarApuntadoresEnArchivo((*subRaiz)->hijoIzquierdo, (*subRaiz)->hijoIzquierdo->hijoDerecho, (*subRaiz)->hijoIzquierdo->hijoIzquierdo, (*subRaiz), (*subRaiz)->hijoDerecho, (*subRaiz)->hijoIzquierdo,1);
 }
